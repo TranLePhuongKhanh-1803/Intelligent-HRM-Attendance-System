@@ -1,0 +1,23 @@
+Traceback (most recent call last):
+  File "<string>", line 10, in <module>
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python312\Lib\site-packages\deepface\DeepFace.py", line 222, in analyze
+    return demography.analyze(
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python312\Lib\site-packages\deepface\modules\demography.py", line 157, in analyze
+    apparent_age = modeling.build_model("Age").predict(img_content)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python312\Lib\site-packages\deepface\modules\modeling.py", line 46, in build_model
+    model_obj[model_name] = model()
+                            ^^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python312\Lib\site-packages\deepface\extendedmodels\Age.py", line 32, in __init__
+    self.model = load_model()
+                 ^^^^^^^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python312\Lib\site-packages\deepface\extendedmodels\Age.py", line 61, in load_model
+    age_model = Model(inputs=model.input, outputs=base_model_output)
+                             ^^^^^^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python312\Lib\site-packages\keras\src\ops\operation.py", line 337, in input
+    return self._get_node_attribute_at_index(0, "input_tensors", "input")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ADMIN\AppData\Local\Programs\Python\Python312\Lib\site-packages\keras\src\ops\operation.py", line 368, in _get_node_attribute_at_index
+    raise AttributeError(
+AttributeError: The layer sequential has never been called and thus has no defined input.. Did you mean: 'inputs'?
