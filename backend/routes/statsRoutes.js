@@ -6,6 +6,8 @@ const {
   getMethodStats,
   getSalaryStats,
   getOverviewStats,
+  getEmotionStats,
+  getTopLateEmployees,
 } = require('../controllers/statsController');
 const { protect, adminOrManager } = require('../middleware/authMiddleware');
 
@@ -16,5 +18,7 @@ router.get('/attendance-trend', getAttendanceTrend);
 router.get('/department', getDepartmentStats);
 router.get('/method', getMethodStats);
 router.get('/salary', getSalaryStats);
+router.get('/emotion', getEmotionStats);
+router.get('/top-late', getTopLateEmployees);
 
 module.exports = router;

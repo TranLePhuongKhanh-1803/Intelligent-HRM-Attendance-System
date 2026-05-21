@@ -92,7 +92,7 @@ const Layout = ({ children }) => {
         { path: '/admin/employees', label: 'Nhân viên Bộ phận', icon: <FiUsers /> },
         { path: '/admin/history', label: 'Dữ liệu Chấm công', icon: <FiClock /> },
         { path: '/leave', label: 'Duyệt Nghỉ phép', icon: <FiFileText /> },
-        { path: '/admin/salary', label: 'Lương Bộ phận', icon: <FiDollarSign /> },
+        ...( (user?.permissions?.includes('manage_salary') || user?.department === 'Accounting') ? [{ path: '/admin/salary', label: 'Quản lý Bảng lương', icon: <FiDollarSign /> }] : []),
         { path: '/admin/announcements', label: 'Bảng tin Nội bộ', icon: <FiBell /> },
       ]
     },

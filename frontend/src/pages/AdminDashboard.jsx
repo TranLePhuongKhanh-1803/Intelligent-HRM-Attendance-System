@@ -14,6 +14,8 @@ const AdminDashboard = () => {
   const [trendData, setTrendData] = useState([]);
   const [deptData, setDeptData] = useState([]);
   const [todayStatusData, setTodayStatusData] = useState([]);
+  const [emotionData, setEmotionData] = useState([]);
+  const [topLateData, setTopLateData] = useState([]);
 
   const buildStatusData = (ov) => {
     const onTime = ov.todayOnTime || 0;
@@ -48,19 +50,23 @@ const AdminDashboard = () => {
         buildStatusData(res.data);
       }).catch(console.error);
       api.get('/attendance/today').then(res => setTodayRecords(res.data.records)).catch(console.error);
+      api.get('/stats/emotion').then(res => setEmotionData(res.data)).catch(console.error);
+      api.get('/stats/top-late').then(res => setTopLateData(res.data)).catch(console.error);
     }
   }, [realtimeAttendance]);
 
   const fetchAllStats = async () => {
     try {
       setLoading(true);
-      const [overviewRes, trendRes, deptRes, salaryRes, todayRes, announcementsRes] = await Promise.all([
+      const [overviewRes, trendRes, deptRes, salaryRes, todayRes, announcementsRes, emotionRes, topLateRes] = await Promise.all([
         api.get('/stats/overview'),
         api.get('/stats/attendance-trend'),
         api.get('/stats/department'),
         api.get('/stats/salary'),
         api.get('/attendance/today'),
-        api.get('/announcements/active')
+        api.get('/announcements/active'),
+        api.get('/stats/emotion'),
+        api.get('/stats/top-late')
       ]);
       setOverview(overviewRes.data);
       setTrendData(trendRes.data);
@@ -68,6 +74,8 @@ const AdminDashboard = () => {
       setSalaryData(salaryRes.data);
       setTodayRecords(todayRes.data.records);
       setAnnouncements(announcementsRes.data);
+      setEmotionData(emotionRes.data);
+      setTopLateData(topLateRes.data);
       buildStatusData(overviewRes.data);
 
 
@@ -247,6 +255,64 @@ const AdminDashboard = () => {
                 transition: 'width 0.5s ease'
               }} />
             </div>
+          </div>
+        </div>
+
+        {/* Emotion Analytics Chart */}
+        <div className="card">
+          <div className="card-header">
+            <h3 className="card-title">🧠 Phân tích Cảm xúc (7 ngày)</h3>
+          </div>
+          <div style={{ height: 250, width: '100%', marginTop: 8 }}>
+            <ResponsiveContainer>
+              <PieChart>
+                <Pie
+                  data={emotionData.length > 0 ? emotionData : [{ name: 'Chưa có dữ liệu', value: 1, color: '#334155' }]}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%" cy="50%"
+                  outerRadius={90}
+                >
+                  {(emotionData.length > 0 ? emotionData : [{ color: '#334155' }]).map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value, name) => [`${value} lượt check-in`, name]} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Top Late Warning Card */}
+        <div className="card">
+          <div className="card-header">
+            <h3 className="card-title" style={{ color: 'var(--accent-warning)' }}>⚠️ Cảnh báo Đi muộn (Tháng này)</h3>
+          </div>
+          <div style={{ marginTop: 8 }}>
+            {topLateData.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {topLateData.map((item, idx) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', background: 'var(--bg-tertiary)', borderRadius: 8 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--gradient-warm)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: 12 }}>
+                      {item.user?.name?.charAt(0) || '?'}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 14, fontWeight: 600 }}>{item.user?.name || 'Không xác định'}</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{item.user?.department || '—'}</div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(239, 83, 80, 0.1)', color: 'var(--accent-danger)', padding: '4px 8px', borderRadius: 4, fontSize: 12, fontWeight: 'bold' }}>
+                      <FiClock /> {item.lateCount} lần
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ padding: 30, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
+                <div style={{ fontSize: 32, opacity: 0.5, marginBottom: 8 }}>🎉</div>
+                Không có nhân viên nào đi muộn trong tháng này!
+              </div>
+            )}
           </div>
         </div>
 

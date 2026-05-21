@@ -21,8 +21,8 @@ router.patch('/:id/bonus', protect, hasPermission('manage_salary'), updateSalary
 router.patch('/approve-all', protect, adminOnly, approveAllSalaries);
 router.patch('/:id/status', protect, adminOnly, updateSalaryStatus);
 
-// View: Admin sees all, Manager sees department
-router.get('/', protect, adminOrManager, getAllSalaries);
+// View: Admin and Accounting sees all
+router.get('/', protect, adminOrAccounting, getAllSalaries);
 router.get('/me', protect, getMySalaries);
 
 module.exports = router;

@@ -207,10 +207,99 @@ const getOverviewStats = async (req, res) => {
   }
 };
 
+// @desc    Get emotion statistics (last 7 days)
+// @route   GET /api/stats/emotion
+const getEmotionStats = async (req, res) => {
+  try {
+    const { departmentUserIds } = await getUserConstraints(req.user);
+    
+    // We want data from the last 7 days
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const fromDate = getVNDateString(sevenDaysAgo);
+    const todayStr = getVNDateString(new Date());
+
+    const baseQuery = departmentUserIds ? { userId: { $in: departmentUserIds } } : {};
+    baseQuery.date = { $gte: fromDate, $lte: todayStr };
+    // Only count records that have an emotion recorded
+    baseQuery.emotion = { $ne: null };
+
+    const records = await Attendance.find(baseQuery).select('emotion');
+
+    // Aggregate counts
+    const counts = {
+      happy: 0,
+      sad: 0,
+      angry: 0,
+      fear: 0,
+      surprise: 0,
+      disgust: 0,
+      neutral: 0
+    };
+
+    records.forEach(r => {
+      if (r.emotion && counts[r.emotion] !== undefined) {
+        counts[r.emotion]++;
+      }
+    });
+
+    // Format for frontend charting
+    const result = [
+      { name: 'Vui vẻ', value: counts.happy, color: '#10b981' }, // Green
+      { name: 'Bình thường', value: counts.neutral, color: '#3b82f6' }, // Blue
+      { name: 'Buồn / Mệt', value: counts.sad + counts.disgust, color: '#64748b' }, // Gray
+      { name: 'Căng thẳng', value: counts.angry + counts.fear, color: '#ef4444' }, // Red
+      { name: 'Ngạc nhiên', value: counts.surprise, color: '#f59e0b' } // Orange
+    ].filter(item => item.value > 0);
+
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server: ' + error.message });
+  }
+};
+
+// @desc    Get top late/absent employees (this month)
+// @route   GET /api/stats/top-late
+const getTopLateEmployees = async (req, res) => {
+  try {
+    const { departmentUserIds } = await getUserConstraints(req.user);
+    
+    const now = new Date();
+    const fromDate = getVNDateString(new Date(now.getFullYear(), now.getMonth(), 1));
+    const todayStr = getVNDateString(now);
+
+    const baseQuery = departmentUserIds ? { userId: { $in: departmentUserIds } } : {};
+    baseQuery.date = { $gte: fromDate, $lte: todayStr };
+    baseQuery.status = 'late';
+
+    const records = await Attendance.aggregate([
+      { $match: baseQuery },
+      { $group: { _id: '$userId', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 5 }
+    ]);
+
+    // Populate user info
+    const populated = await User.populate(records, { path: '_id', select: 'name avatar department position' });
+    
+    // Format output
+    const result = populated.map(item => ({
+      user: item._id,
+      lateCount: item.count
+    })).filter(item => item.user);
+
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server: ' + error.message });
+  }
+};
+
 module.exports = {
   getAttendanceTrend,
   getDepartmentStats,
   getMethodStats,
   getSalaryStats,
   getOverviewStats,
+  getEmotionStats,
+  getTopLateEmployees,
 };
