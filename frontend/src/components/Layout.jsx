@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
-import { FiGrid, FiUsers, FiCamera, FiClock, FiLogOut, FiSun, FiMoon, FiDollarSign, FiUser, FiCalendar, FiBell, FiCheck, FiFileText, FiClipboard } from 'react-icons/fi';
+import { FiGrid, FiUsers, FiCamera, FiClock, FiLogOut, FiSun, FiMoon, FiDollarSign, FiUser, FiCalendar, FiBell, FiCheck, FiFileText, FiClipboard, FiMenu } from 'react-icons/fi';
 import api from '../services/api';
 
 const Layout = ({ children }) => {
@@ -11,6 +11,7 @@ const Layout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const notificationRef = useRef(null);
 
   useEffect(() => {
@@ -141,8 +142,13 @@ const Layout = ({ children }) => {
 
   return (
     <div className="app-layout">
+      {/* Sidebar Overlay */}
+      {isMobileMenuOpen && (
+        <div className="sidebar-overlay" onClick={() => setIsMobileMenuOpen(false)}></div>
+      )}
+
       {/* Sidebar */}
-      <aside className="sidebar">
+      <aside className={`sidebar ${isMobileMenuOpen ? 'open' : ''}`}>
         <div className="sidebar-logo">
           <div className="sidebar-logo-icon">🏢</div>
           <div>
@@ -160,7 +166,10 @@ const Layout = ({ children }) => {
                 <button
                   key={link.path}
                   className={`sidebar-link ${location.pathname === link.path ? 'active' : ''}`}
-                  onClick={() => navigate(link.path)}
+                  onClick={() => {
+                    navigate(link.path);
+                    setIsMobileMenuOpen(false);
+                  }}
                 >
                   <span className="icon">{link.icon}</span>
                   {link.label}
@@ -185,7 +194,12 @@ const Layout = ({ children }) => {
 
       {/* Header */}
       <header className="header">
-        <h1 className="header-title">{getPageTitle()}</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button className="btn-icon mobile-menu-btn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+            <FiMenu />
+          </button>
+          <h1 className="header-title">{getPageTitle()}</h1>
+        </div>
         <div className="header-actions">
           <div className="notification-wrapper" ref={notificationRef} style={{ position: 'relative' }}>
             <button 

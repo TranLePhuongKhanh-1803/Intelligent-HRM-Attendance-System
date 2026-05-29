@@ -114,11 +114,13 @@ const roundToTwoDecimals = (value) => {
 };
 
 const getWorkdayCredit = (workedHours) => {
-  if (workedHours <= 0) {
-    return 0;
+  if (workedHours < 4) {
+    return 0; // Dưới 4 tiếng: Không tính công
   }
-
-  return Math.min(1, roundToTwoDecimals(workedHours / STANDARD_HOURS_PER_DAY));
+  if (workedHours >= 4 && workedHours < 7.5) {
+    return 0.5; // Từ 4 tiếng đến dưới 7.5 tiếng: Nửa ngày
+  }
+  return 1; // Từ 7.5 tiếng trở lên: Đủ 1 ngày
 };
 
 const getHourlyRate = (basicSalary, standardWorkDays) => {
@@ -160,6 +162,7 @@ const computeSalary = async (userId, month, year) => {
   let actualDays = 0;
   let lateDays = 0;
   let lateMinutes = 0;
+  let totalPenaltyAmount = 0;
   let overtimeHours = 0;
   let overtimeSalary = 0;
   const attendedWorkdayDates = new Set();
@@ -190,7 +193,18 @@ const computeSalary = async (userId, month, year) => {
       const hour = parseInt(checkInTime.toLocaleTimeString('en-US', { timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', hour12: false }));
       const min = parseInt(checkInTime.toLocaleTimeString('en-US', { timeZone: 'Asia/Ho_Chi_Minh', minute: '2-digit' }));
       let diff = (hour - 9) * 60 + min;
-      if (diff > 0) lateMinutes += diff;
+      if (diff > 0) {
+        lateMinutes += diff;
+        // Phạt đi trễ theo bậc
+        if (diff > 30) {
+          totalPenaltyAmount += 100000;
+        } else if (diff >= 16) {
+          totalPenaltyAmount += 50000;
+        } else if (diff >= 6) {
+          totalPenaltyAmount += 20000;
+        }
+        // <= 5 phút không bị phạt
+      }
     }
 
     if (isHolidayAttendance) {
@@ -232,8 +246,10 @@ const computeSalary = async (userId, month, year) => {
   const allowance = ALLOWANCE_MAP[user.position] || 0;
   const salaryPerDay = standardWorkDays > 0 ? Math.round(basicSalary / standardWorkDays) : 0;
   const totalSalary = salaryPerDay * actualDays;
-  const penalty = lateMinutes * LATE_PENALTY_PER_MINUTE;
-  const taxAndInsurance = Math.round(basicSalary * 0.105);
+  // Áp dụng mức phạt theo bậc
+  const penalty = totalPenaltyAmount;
+  // Fix: Chỉ đóng bảo hiểm nếu làm từ 14 ngày trở lên trong tháng
+  const taxAndInsurance = actualDays >= 14 ? Math.round(basicSalary * 0.105) : 0;
 
   // Check existing salary record
   let salary = await Salary.findOne({ userId, month, year });

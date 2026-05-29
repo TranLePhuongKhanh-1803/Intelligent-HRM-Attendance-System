@@ -144,6 +144,20 @@ a:hover {
 }
 
 /* ===== Sidebar ===== */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 90;
+  animation: fadeIn 0.2s ease;
+}
+
+.mobile-menu-btn {
+  display: none;
+}
+
 .sidebar {
   position: fixed;
   left: 0;
@@ -1071,6 +1085,14 @@ a:hover {
     transform: translateX(0);
   }
   
+  .sidebar-overlay {
+    display: block;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+  }
+
   .main-content {
     margin-left: 0;
   }
@@ -1084,6 +1106,12 @@ a:hover {
   }
   
   .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-cards {
     grid-template-columns: 1fr;
   }
 }
