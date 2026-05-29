@@ -27,9 +27,7 @@ const HomePage = () => {
           <a href="#contact">Liên hệ</a>
         </nav>
         <div className="hp-auth-buttons">
-          <Link to="/login" className="hp-btn hp-btn-outline">
-            Đăng ký
-          </Link>
+
           <Link to="/login" className="hp-btn hp-btn-primary">
             Đăng nhập
           </Link>
