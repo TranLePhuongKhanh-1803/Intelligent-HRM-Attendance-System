@@ -17,21 +17,26 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            export NVM_DIR="$HOME/.nvm"
+            source $NVM_DIR/nvm.sh
+
+            export PATH=$PATH:/home/khanh/.nvm/versions/node/v22.22.3/bin
+
             cd /home/khanh/app
 
             echo "Pull latest code"
             git pull origin main
 
-            echo "Restart backend"
+            echo "Backend update"
             cd backend
             npm install
             pm2 restart backend
 
-            echo "Restart deepface service"
+            echo "Deepface service update"
             cd ../deepface_service
             pm2 restart deepface-service
 
-            echo "Build frontend"
+            echo "Frontend build"
             cd ../frontend
             npm install
             npm run build
