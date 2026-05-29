@@ -1,0 +1,38 @@
+name: Deploy Intelligent HRM
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/khanh/app
+
+            echo "Pull latest code"
+            git pull origin main
+
+            echo "Restart backend"
+            cd backend
+            npm install
+            pm2 restart backend
+
+            echo "Restart deepface service"
+            cd ../deepface_service
+            pm2 restart deepface-service
+
+            echo "Build frontend"
+            cd ../frontend
+            npm install
+            npm run build
+            pm2 restart frontend
