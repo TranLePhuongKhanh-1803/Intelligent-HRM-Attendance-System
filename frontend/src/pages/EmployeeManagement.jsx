@@ -124,9 +124,11 @@ const EmployeeManagement = () => {
             </select>
           </div>
         )}
-        <button className="btn btn-primary" onClick={handleCreate}>
-          <FiPlus /> Thêm nhân viên
-        </button>
+        {user?.role === 'admin' && (
+          <button className="btn btn-primary" onClick={handleCreate}>
+            <FiPlus /> Thêm nhân viên
+          </button>
+        )}
       </div>
 
       {/* Employee Table */}
@@ -171,7 +173,8 @@ const EmployeeManagement = () => {
                       </td>
                       <td>
                         {emp.hasFaceData ? (
-                          <span className="badge badge-success" style={{ cursor: 'pointer' }} title="Nhấn để xóa Face ID" onClick={async () => {
+                          <span className="badge badge-success" style={{ cursor: user?.role === 'admin' ? 'pointer' : 'default' }} title={user?.role === 'admin' ? "Nhấn để xóa Face ID" : "Đã có Face ID"} onClick={async () => {
+                            if (user?.role !== 'admin') return;
                             if (!window.confirm(`Xóa dữ liệu khuôn mặt của "${emp.name}"? Nhân viên sẽ cần đăng ký lại.`)) return;
                             try {
                               await api.delete(`/employees/${emp._id}/face`);
@@ -181,7 +184,7 @@ const EmployeeManagement = () => {
                               alert(err.response?.data?.message || 'Lỗi khi xóa!');
                             }
                           }}>
-                            ✅ Có (Xóa)
+                            ✅ Có {user?.role === 'admin' && '(Xóa)'}
                           </span>
                         ) : (
                           <span className="badge badge-danger">❌ Chưa</span>
@@ -189,16 +192,14 @@ const EmployeeManagement = () => {
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: 4 }}>
-                          {!(user?.role === 'manager' && (emp.role === 'admin' || emp.role === 'manager') && emp._id !== user._id) && (
+                          {user?.role === 'admin' && (
                             <>
                               <button className="btn-icon" onClick={() => handleEdit(emp)} title="Sửa">
                                 <FiEdit2 />
                               </button>
-                              {!(user?.role === 'manager' && emp._id === user._id) && ( // Prevent manager from deleting themselves as they are manager
-                                <button className="btn-icon" style={{ color: 'var(--accent-danger)' }} onClick={() => handleDelete(emp._id, emp.name)} title="Xóa">
-                                  <FiTrash2 />
-                                </button>
-                              )}
+                              <button className="btn-icon" style={{ color: 'var(--accent-danger)' }} onClick={() => handleDelete(emp._id, emp.name)} title="Xóa">
+                                <FiTrash2 />
+                              </button>
                             </>
                           )}
                         </div>
