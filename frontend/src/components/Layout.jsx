@@ -103,6 +103,7 @@ const Layout = ({ children }) => {
         { path: '/employee', label: 'Trang cá nhân', icon: <FiUser /> },
         { path: '/attendance', label: 'Chấm công Face ID', icon: <FiCamera /> },
         { path: '/calendar', label: 'Lịch làm việc', icon: <FiCalendar /> },
+        { path: '/employee/salary', label: 'Xem Bảng lương', icon: <FiDollarSign /> },
         { path: '/profile', label: 'Hồ sơ của tôi', icon: <FiClipboard /> },
       ]
     }
