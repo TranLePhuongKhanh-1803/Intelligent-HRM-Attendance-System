@@ -63,7 +63,7 @@ const checkIn = async (req, res) => {
       // 1:1 verification — compare only against the logged-in user's face
       const result = verifyUserFace(faceVector, user);
       if (!result.verified) {
-        return res.status(401).json({ message: 'Khuôn mặt không khớp với tài khoản của bạn. Vui lòng thử lại.' });
+        return res.status(400).json({ message: 'Khuôn mặt không khớp với tài khoản của bạn. Vui lòng thử lại.' });
       }
 
       console.log(`[CheckIn] Face verified: ${user.name} (distance: ${result.distance.toFixed(4)})`);
@@ -158,7 +158,7 @@ const checkOut = async (req, res) => {
       // 1:1 verification — compare only against the logged-in user's face
       const result = verifyUserFace(faceVector, user);
       if (!result.verified) {
-        return res.status(401).json({ message: 'Khuôn mặt không khớp với tài khoản của bạn. Vui lòng thử lại.' });
+        return res.status(400).json({ message: 'Khuôn mặt không khớp với tài khoản của bạn. Vui lòng thử lại.' });
       }
 
       console.log(`[CheckOut] Face verified: ${user.name} (distance: ${result.distance.toFixed(4)})`);
